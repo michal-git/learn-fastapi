@@ -1,2 +1,6 @@
 # ignore virtual environment
 fastapi-venv/
+
+__pycache__/
+*.pyc
+
