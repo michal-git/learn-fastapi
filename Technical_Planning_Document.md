@@ -99,7 +99,25 @@ or
 #### DELETE `/api/v1/exercises/{exercise_id}`
 - Removes the exercise record and related rows in fill_gap_sentence or multiple_choice_question.
 
-(If you prefer separate endpoints for fill-gap vs. multiple-choice, that’s fine. The key is they live under /api/v1/exercises rather than /teacher/exercises/….)
+### 2.2.6  Manage Fill-Gap Sentences (Child Records)
+#### POST `/api/v1/exercises/{exercise_id}/fill-gap-sentences`
+- Creates a new row in fill_gap_sentence referencing the parent exercise.
+#### PUT `/api/v1/exercises/{exercise_id}/fill-gap-sentences/{sentence_id}`
+- Updates a specific sentence in fill_gap_sentence.
+#### DELETE `/api/v1/exercises/{exercise_id}/fill-gap-sentences/{sentence_id}`
+- Removes the specified row in fill_gap_sentence.
+
+> Note: (Ensure the parent exercise has exercise_type="fill_in_gap" or return an error.)
+
+### 2.2.7  Manage Multiple-Choice Questions (Child Records)
+Same as above:
+- `POST /api/v1/exercises/{exercise_id}/multiple-choice-questions`
+
+- `PUT /api/v1/exercises/{exercise_id}/multiple-choice-questions/{sentence_id}`
+
+- `DELETE /api/v1/exercises/{exercise_id}/multiple-choice-questions/{sentence_id}`
+
+> Note: (Similarly, ensure the parent exercise has exercise_type="multiple_choice".)
 
 ## 2.3. Exercise Sets (Lessons/Exams)
 Teachers group exercises into sets that learners can access. Again, these endpoints are typically reserved for teachers or higher roles.
@@ -170,6 +188,21 @@ Teachers group exercises into sets that learners can access. Again, these endpoi
 - `PUT /api/v1/exercises/{exercise_id}`
 
 - `DELETE /api/v1/exercises/{exercise_id}`
+
+#### Child Sentence/Question Endpoints
+Fill-Gap Sentences:
+- `POST /api/v1/exercises/{exercise_id}/fill-gap-sentences`
+
+- `PUT /api/v1/exercises/{exercise_id}/fill-gap-sentences/{sentence_id}`
+
+- `DELETE /api/v1/exercises/{exercise_id}/fill-gap-sentences/{sentence_id}`
+
+Multiple-Choice Questions:
+- `POST /api/v1/exercises/{exercise_id}/multiple-choice-questions`
+
+- `PUT /api/v1/exercises/{exercise_id}/multiple-choice-questions/{sentence_id}`
+
+- `DELETE /api/v1/exercises/{exercise_id}/multiple-choice-questions/{sentence_id}`
 
 ### Exercise Sets (Also teacher/admin only)
 - `POST /api/v1/exercise-sets`
