@@ -5,7 +5,7 @@ from typing import List, Optional
 
 class MultipleChoiceQuestionBase(BaseModel):
     question: str
-    options: List[str]
+    choices: List[str]
     correct_index: int
 
 

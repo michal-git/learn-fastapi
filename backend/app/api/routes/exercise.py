@@ -12,7 +12,7 @@ from app.services.exercise_service import (
 )
 
 
-router = APIRouter(tags=["exercises"])
+router = APIRouter(tags=["exercise"])
 
 
 @router.get(
@@ -63,4 +63,4 @@ def update_exercise_endpoint(exercise_id: UUID, update_data: ExerciseUpdate):
     description="Delete an exercise by its unique identifier. Returns HTTP 204 No Content if deletion is successful.",
 )
 def delete_exercise_endpoint(exercise_id: UUID):
-    delete_exercise(exercise_id)
+    return delete_exercise(exercise_id)

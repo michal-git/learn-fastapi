@@ -15,16 +15,16 @@ class ExerciseType(str, Enum):
 class ExerciseBase(BaseModel):
     title: str
     description: Optional[str] = None
-    exercise_type: ExerciseType
+    type: ExerciseType
 
 
 class FillGapExerciseCreate(ExerciseBase):
-    exercise_type: ExerciseType = ExerciseType.FILL_GAP
+    type: ExerciseType = ExerciseType.FILL_GAP
     fill_gap_sentences: List[FillGapSentence] = Field(..., min_items=1)
 
 
 class MultipleChoiceExerciseCreate(ExerciseBase):
-    exercise_type: ExerciseType = ExerciseType.MULTIPLE_CHOICE
+    type: ExerciseType = ExerciseType.MULTIPLE_CHOICE
     multiple_choice_questions: List[MultipleChoiceQuestion] = Field(..., min_items=1)
 
 

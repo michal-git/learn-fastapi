@@ -53,7 +53,7 @@ All endpoints under `/api/v1/exercises` are for creating and managing exercises.
 **Request Body** might look like (fill-in-gap example):
 ```json
 {
-  "exercise_type": "fill_in_gap",
+  "type": "fill_in_gap",
   "title": "Irregular Verbs Practice",
   "fill_gap_sentences": [
     { "text": "I ___ a book.", "correct_answer": "read" }
@@ -63,7 +63,7 @@ All endpoints under `/api/v1/exercises` are for creating and managing exercises.
 or
 ```json
 {
-  "exercise_type": "multiple_choice",
+  "type": "multiple_choice",
   "title": "Vocabulary Test",
   "multiple_choice_questions": [
     {
@@ -76,8 +76,8 @@ or
 ```
 
 **Behavior**:
-- If `exercise_type = fill_in_gap`, create a row in `exercise` + rows in `fill_gap_sentence`.
-- If `exercise_type = multiple_choice`, create a row in `exercise` + rows in `multiple_choice_question`.
+- If `type = fill_in_gap`, create a row in `exercise` + rows in `fill_gap_sentence`.
+- If `type = multiple_choice`, create a row in `exercise` + rows in `multiple_choice_question`.
 
 **Authorization**: Only users with role="teacher" (or similar) can create exercises.
 
@@ -107,7 +107,7 @@ or
 #### DELETE `/api/v1/exercises/{exercise_id}/fill-gap-sentences/{sentence_id}`
 - Removes the specified row in fill_gap_sentence.
 
-> Note: (Ensure the parent exercise has exercise_type="fill_in_gap" or return an error.)
+> Note: (Ensure the parent exercise has type="fill_in_gap" or return an error.)
 
 ### 2.2.7  Manage Multiple-Choice Questions (Child Records)
 Same as above:
@@ -117,7 +117,7 @@ Same as above:
 
 - `DELETE /api/v1/exercises/{exercise_id}/multiple-choice-questions/{sentence_id}`
 
-> Note: (Similarly, ensure the parent exercise has exercise_type="multiple_choice".)
+> Note: (Similarly, ensure the parent exercise has type="multiple_choice".)
 
 ## 2.3. Exercise Sets (Lessons/Exams)
 Teachers group exercises into sets that learners can access. Again, these endpoints are typically reserved for teachers or higher roles.
@@ -179,7 +179,7 @@ Teachers group exercises into sets that learners can access. Again, these endpoi
 - `POST /api/v1/auth/login`
 
 ### Exercises (Requires role = Teacher or Admin, typically)
-- `POST /api/v1/exercises` (create fill-gap or multiple-choice, based on `exercise_type`)
+- `POST /api/v1/exercises` (create fill-gap or multiple-choice, based on `type`)
 
 - `GET /api/v1/exercises (list my exercises)`
 
@@ -249,13 +249,13 @@ Multiple-Choice Questions:
                       |---------------|
                       | id (PK)       |
                       | teacher_id FK |
-                      | exercise_type |
+                      | type          |
                       | title         |
                       | created_at    |
                       | updated_at    |
                       +---------------+
                          | 1       \
-                         |          \  (Depending on exercise_type)
+                         |          \  (Depending on type)
                          | N         \
      +------------------------+       +--------------------------------+
      |   fill_gap_sentence    |       | multiple_choice_question       |
