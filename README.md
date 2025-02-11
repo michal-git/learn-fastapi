@@ -5,14 +5,13 @@ This project is a learning practice for **FastAPI** and **Pydantic**, where I bu
 ## 🚀 Features
 - **CRUD operations**: Create, Read, Update, and Delete exercise questions.
 - **Question Types**:
-  - ✅ **True/False** (initial implementation)
   - ✏️ **Fill-in-the-gap** (planned)
   - 🔘 **Multiple choice** (planned)
 
 ## 🛠 Tech Stack
-- 🚀 **FastAPI** (for the API backend)
-- 📦 **Pydantic** (for data validation)
-- 🐍 **Python 3.12+**
+- **FastAPI** (for the API backend)
+- **Pydantic** (for data validation)
+- **Python 3.12+**
 
 ## 🔧 Setup & Installation
 1. **Clone the repository**:
