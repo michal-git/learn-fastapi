@@ -1,5 +1,6 @@
 from typing import List
 
-from app.schemas.truefalse_question import TrueFalseQuestion
+from app.schemas.exercise import Exercise
 
-TRUE_FALSE_QUESTIONS: List[TrueFalseQuestion] = []
+
+EXERCISES: List[Exercise] = []
