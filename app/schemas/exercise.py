@@ -35,3 +35,8 @@ class Exercise(ExerciseBase):
     id: UUID = Field(default_factory=uuid4)
     fill_gap_sentences: Optional[List[FillGapSentence]] = None
     multiple_choice_questions: Optional[List[MultipleChoiceQuestion]] = None
+
+
+class ExerciseUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
