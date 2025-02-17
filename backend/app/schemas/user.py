@@ -15,3 +15,8 @@ class UserRead(BaseModel):
     username: str
     email: str
     role: UserRole
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

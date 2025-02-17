@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from app.core.db import init_db
 from fastapi import FastAPI
 from app.api.api_router import api_router
+from app.core.config import API_V1_STR
 
 
 @asynccontextmanager
@@ -16,7 +17,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix=API_V1_STR)
 
 
 if __name__ == "__main__":

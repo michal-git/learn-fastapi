@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import HTTPException
 from sqlmodel import select
 from app.schemas.user import UserCreate, UserRead
@@ -34,3 +35,7 @@ def register_user(user_data: UserCreate, session: SessionDep) -> UserRead:
         email=new_user.email,
         role=new_user.role,
     )
+
+
+def get_user_by_email(email: str, session: SessionDep) -> Optional[User]:
+    return session.exec(select(User).where(User.email == email)).first()
