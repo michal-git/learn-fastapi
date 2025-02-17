@@ -7,26 +7,19 @@ from fastapi import Depends, HTTPException, status
 from app.core.db import engine
 from app.schemas.exercise import Exercise, ExerciseCreate, ExerciseType, ExerciseUpdate
 from app.models.exercise import Exercise as ExerciseModel
-from backend.app.models.fill_gap_sentence import FillGapSentence as FillGapSentenceModel
-from backend.app.models.multiple_choice_question import (
+from app.api.deps import SessionDep
+from app.models.fill_gap_sentence import FillGapSentence as FillGapSentenceModel
+from app.models.multiple_choice_question import (
     MultipleChoiceQuestion as MultipleChoiceQuestionModel,
 )
 
 
-# Dependency
-def get_session():
-    with Session(engine) as session:
-        yield session
-
-
-def get_exercises(session: Session = Depends(get_session)) -> List[Exercise]:
+def get_exercises(session: SessionDep) -> List[Exercise]:
     exercises_model = session.exec(select(ExerciseModel)).all()
     return [to_exercise_schema(e) for e in exercises_model]
 
 
-def get_exercise(
-    exercise_id: UUID, session: Session = Depends(get_session)
-) -> Exercise:
+def get_exercise(exercise_id: UUID, session: SessionDep) -> Exercise:
     exercise_model = session.get(ExerciseModel, exercise_id)
 
     if exercise_model is None:
@@ -38,9 +31,7 @@ def get_exercise(
     return to_exercise_schema(exercise_model)
 
 
-def create_exercise(
-    exercise_data: ExerciseCreate, session: Session = Depends(get_session)
-) -> Exercise:
+def create_exercise(exercise_data: ExerciseCreate, session: SessionDep) -> Exercise:
     exercise_type = session.exec(
         select(ExerciseType).where(ExerciseType.name == exercise_data.type.value)
     ).first()
@@ -72,7 +63,7 @@ def create_exercise(
 def update_exercise(
     exercise_id: UUID,
     update_data: ExerciseUpdate,
-    session: Session = Depends(get_session),
+    session: SessionDep,
 ) -> Exercise:
     exercise_model = session.get(ExerciseModel, exercise_id)
 
@@ -93,9 +84,7 @@ def update_exercise(
     return to_exercise_schema(exercise_model)
 
 
-def delete_exercise(
-    exercise_id: UUID, session: Session = Depends(get_session)
-) -> Exercise:
+def delete_exercise(exercise_id: UUID, session: SessionDep) -> Exercise:
     exercise = get_exercise(exercise_id)
     if exercise is None:
         raise HTTPException(

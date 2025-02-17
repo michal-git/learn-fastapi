@@ -29,3 +29,19 @@ This project is a learning practice for **FastAPI** and **Pydantic**, where I bu
    uvicorn main:app --reload
    ```
 
+## 🔧 Useful Commands
+- Activate a virtual environment:
+```cmd
+cd .\backend\
+.\fastapi-venv\Scripts\activate 
+```
+
+- Deactivate the virtual environment:
+```cmd
+deactivate
+```
+
+- Add installed package to `requirements.txt`:
+```cmd
+pip freeze > requirements.txt
+```
