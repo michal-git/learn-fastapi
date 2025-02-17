@@ -14,20 +14,18 @@ This project is a learning practice for **FastAPI** and **Pydantic**, where I bu
 - **Python 3.12+**
 
 ## 🔧 Setup & Installation
-1. **Clone the repository**:
-   ```sh
-   python -m venv fastapi-venv
-   source fastapi-venv/Scripts/activate  # On Windows
-   pip install -r requirements.txt
-   ```
-1. **Run the localhost (on Windows)**:
-   ```sh
-   python main.py
-   ```
-   OR
-   ```sh
-   uvicorn main:app --reload
-   ```
+1. **Create a new virtual environment**:
+```sh
+python -m venv <venv-name>
+source ./fastapi-venv/Scripts/activate  # On Windows
+pip install -r requirements.txt
+```
+2. **Run the localhost (on Windows)**:
+
+Might not work because of the missing local db
+```sh
+\fastapi\backend uvicorn app.main:app --reload
+```
 
 ## 🔧 Useful Commands
 - Activate a virtual environment:

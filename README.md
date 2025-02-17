@@ -13,19 +13,19 @@ This project is a learning practice for **FastAPI** and **Pydantic**, where I bu
 - **Pydantic** (for data validation)
 - **Python 3.12+**
 
-## 🔧 Setup & Installation
-1. **Clone the repository**:
-   ```sh
-   python -m venv fastapi-venv
-   source fastapi-venv/Scripts/activate  # On Windows
-   pip install -r requirements.txt
-   ```
-1. **Run the localhost (on Windows)**:
-   ```sh
-   python main.py
-   ```
-   OR
-   ```sh
-   uvicorn main:app --reload
-   ```
+## 🔧 Run in Docker
 
+Build contrainers
+```sh
+\fastapi docker-compose up --build
+```
+
+Destroy containers
+```sh
+\fastapi docker-compose down
+```
+
+Start up containers when exist
+```sh
+\fastapi docker-compose up
+```
