@@ -1,5 +1,7 @@
 from datetime import timedelta
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.schemas.user import UserCreate, UserLogin, UserRead
 from app.schemas.token import Token
@@ -27,8 +29,13 @@ def register(user_data: UserCreate, session: SessionDep):
     summary="User login",
     description="Authenticates the user and returns a JWT access token.",
 )
-def login(user_credentials: UserLogin, session: SessionDep):
-    user = authenticate_user(user_credentials.email, user_credentials.password, session)
+def login(
+    user_credentials: Annotated[OAuth2PasswordRequestForm, Depends()],
+    session: SessionDep,
+):
+    user = authenticate_user(
+        user_credentials.username, user_credentials.password, session
+    )
 
     if not user:
         raise HTTPException(

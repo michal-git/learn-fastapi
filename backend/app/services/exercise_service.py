@@ -2,38 +2,73 @@ from typing import Callable, List
 from uuid import UUID
 
 from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload
 
-from fastapi import Depends, HTTPException, status
-from app.core.db import engine
-from app.schemas.exercise import Exercise, ExerciseCreate, ExerciseType, ExerciseUpdate
-from app.models.exercise import Exercise as ExerciseModel
-from app.api.deps import SessionDep
+from fastapi import HTTPException, status
+from app.schemas.exercise import (
+    Exercise,
+    ExerciseCreate,
+    ExerciseType,
+    ExerciseUpdate,
+)
+from app.models.exercise import (
+    Exercise as ExerciseModel,
+    ExerciseType as ExerciseTypeModel,
+)
+from app.api.deps import CurrentUser, SessionDep
 from app.models.fill_gap_sentence import FillGapSentence as FillGapSentenceModel
 from app.models.multiple_choice_question import (
     MultipleChoiceQuestion as MultipleChoiceQuestionModel,
 )
+from app.schemas.fill_gap_sentence import FillGapSentence
+from app.schemas.multiple_choice_question import MultipleChoiceQuestion
 
 
-def get_exercises(session: SessionDep) -> List[Exercise]:
-    exercises_model = session.exec(select(ExerciseModel)).all()
-    return [to_exercise_schema(e) for e in exercises_model]
+def get_exercises(current_user: CurrentUser, session: SessionDep) -> List[Exercise]:
+    exercise_models = session.exec(
+        select(ExerciseModel)
+        .where(ExerciseModel.owner_id == current_user.id)
+        .options(
+            selectinload(ExerciseModel.exercise_type),
+            selectinload(ExerciseModel.fill_gap_sentences),
+            selectinload(ExerciseModel.multiple_choice_questions),
+        )
+    ).all()
+
+    return [to_exercise_schema(e) for e in exercise_models]
 
 
-def get_exercise(exercise_id: UUID, session: SessionDep) -> Exercise:
-    exercise_model = session.get(ExerciseModel, exercise_id)
+def get_exercise(
+    exercise_id: UUID, current_user: CurrentUser, session: SessionDep
+) -> Exercise:
+    exercise_model = session.exec(
+        select(ExerciseModel)
+        .where(
+            ExerciseModel.id == exercise_id, ExerciseModel.owner_id == current_user.id
+        )
+        .options(
+            selectinload(ExerciseModel.exercise_type),
+            selectinload(ExerciseModel.fill_gap_sentences),
+            selectinload(ExerciseModel.multiple_choice_questions),
+        )
+    ).first()
 
     if exercise_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Exercise with ID {exercise_id} not found.",
+            detail=f"Exercise with ID {exercise_id} not found for the current user.",
         )
 
     return to_exercise_schema(exercise_model)
 
 
-def create_exercise(exercise_data: ExerciseCreate, session: SessionDep) -> Exercise:
+def create_exercise(
+    exercise_data: ExerciseCreate, current_user: CurrentUser, session: SessionDep
+) -> Exercise:
     exercise_type = session.exec(
-        select(ExerciseType).where(ExerciseType.name == exercise_data.type.value)
+        select(ExerciseTypeModel).where(
+            ExerciseTypeModel.name == exercise_data.type.value
+        )
     ).first()
 
     if not exercise_type:
@@ -43,7 +78,7 @@ def create_exercise(exercise_data: ExerciseCreate, session: SessionDep) -> Exerc
         )
 
     new_exercise = ExerciseModel(
-        teacher_id=exercise_data.teacher_id,  # TODO: Use current user id
+        owner_id=current_user.id,
         exercise_type_id=exercise_type.id,
         title=exercise_data.title,
         description=exercise_data.description,
@@ -63,14 +98,19 @@ def create_exercise(exercise_data: ExerciseCreate, session: SessionDep) -> Exerc
 def update_exercise(
     exercise_id: UUID,
     update_data: ExerciseUpdate,
+    current_user: CurrentUser,
     session: SessionDep,
 ) -> Exercise:
-    exercise_model = session.get(ExerciseModel, exercise_id)
+    exercise_model = session.exec(
+        select(ExerciseModel).where(
+            ExerciseModel.id == exercise_id, ExerciseModel.owner_id == current_user.id
+        )
+    ).first()
 
     if exercise_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Exercise with ID {exercise_id} not found.",
+            detail=f"Exercise with ID {exercise_id} not found for the current user.",
         )
 
     update_dict = update_data.model_dump(exclude_unset=True)
@@ -84,17 +124,24 @@ def update_exercise(
     return to_exercise_schema(exercise_model)
 
 
-def delete_exercise(exercise_id: UUID, session: SessionDep) -> Exercise:
-    exercise = get_exercise(exercise_id)
-    if exercise is None:
+def delete_exercise(
+    exercise_id: UUID, current_user: CurrentUser, session: SessionDep
+) -> Exercise:
+    exercise_model = session.exec(
+        select(ExerciseModel).where(
+            ExerciseModel.id == exercise_id, ExerciseModel.owner_id == current_user.id
+        )
+    ).first()
+
+    if exercise_model is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Exercise with ID {exercise_id} not found.",
         )
 
-    session.delete(exercise)
+    session.delete(exercise_model)
     session.commit()
-    return exercise
+    return to_exercise_schema(exercise_model)
 
 
 def to_exercise_schema(model: ExerciseModel) -> Exercise:
@@ -102,9 +149,40 @@ def to_exercise_schema(model: ExerciseModel) -> Exercise:
         id=model.id,
         title=model.title,
         description=model.description,
-        type=ExerciseType(model.exercise_type),
-        fill_gap_sentences=model.fill_gap_sentences,
-        multiple_choice_questions=model.multiple_choice_questions,
+        type=ExerciseType(model.exercise_type.name) if model.exercise_type else None,
+        fill_gap_sentences=(
+            [
+                to_fill_gap_sentence_schema(sentence)
+                for sentence in model.fill_gap_sentences
+            ]
+            if model.fill_gap_sentences
+            else []
+        ),
+        multiple_choice_questions=(
+            [
+                to_multiple_choice_question_schema(question)
+                for question in model.multiple_choice_questions
+            ]
+            if model.multiple_choice_questions
+            else []
+        ),
+    )
+
+
+def to_fill_gap_sentence_schema(model: FillGapSentenceModel) -> FillGapSentence:
+    return FillGapSentence(
+        id=model.id, sentence=model.sentence, correct_answer=model.correct_answer
+    )
+
+
+def to_multiple_choice_question_schema(
+    model: MultipleChoiceQuestionModel,
+) -> MultipleChoiceQuestion:
+    return MultipleChoiceQuestion(
+        id=model.id,
+        question=model.question,
+        choices=model.choices,
+        correct_index=model.correct_index,
     )
 
 
@@ -128,7 +206,7 @@ def handle_fill_gap_exercise(
     for sentence in exercise_data.fill_gap_sentences:
         fill_gap_sentence = FillGapSentenceModel(
             exercise_id=exercise_id,
-            text=sentence.sentence,
+            sentence=sentence.sentence,
             correct_answer=sentence.correct_answer,
         )
         session.add(fill_gap_sentence)
@@ -142,7 +220,7 @@ def handle_multiple_choice_exercise(
     for question in exercise_data.multiple_choice_questions:
         multiple_choice_question = MultipleChoiceQuestionModel(
             exercise_id=exercise_id,
-            question_text=question.question,
+            question=question.question,
             choices=question.choices,
             correct_choice_index=question.correct_choice_index,
         )

@@ -10,6 +10,7 @@ from app.services.exercise_service import (
     delete_exercise,
     update_exercise,
 )
+from app.api.deps import CurrentUser, SessionDep
 
 
 router = APIRouter(tags=["exercise"])
@@ -21,8 +22,8 @@ router = APIRouter(tags=["exercise"])
     summary="List all exercises",
     description="Retrieve a list of all available exercises stored in memory.",
 )
-def read_exercises():
-    return get_exercises()
+def read_exercises(current_user: CurrentUser, session: SessionDep):
+    return get_exercises(current_user, session)
 
 
 @router.get(
@@ -31,8 +32,8 @@ def read_exercises():
     summary="Retrieve an exercise",
     description="Get an exercise by its unique identifier. Returns a 404 error if the exercise is not found.",
 )
-def read_exercise(exercise_id: UUID):
-    return get_exercise(exercise_id)
+def read_exercise(exercise_id: UUID, current_user: CurrentUser, session: SessionDep):
+    return get_exercise(exercise_id, current_user, session)
 
 
 @router.post(
@@ -42,8 +43,10 @@ def read_exercise(exercise_id: UUID):
     summary="Create a new exercise",
     description="Create a new exercise (either fill-gap or multiple-choice) ensuring at least one sentence or question is provided.",
 )
-def create_exercise_endpoint(exercise: ExerciseCreate):
-    return create_exercise(exercise)
+def create_exercise_endpoint(
+    exercise: ExerciseCreate, current_user: CurrentUser, session: SessionDep
+):
+    return create_exercise(exercise, current_user, session)
 
 
 @router.put(
@@ -52,8 +55,13 @@ def create_exercise_endpoint(exercise: ExerciseCreate):
     summary="Update exercise core data",
     description="Update core fields of an exercise (title, description).",
 )
-def update_exercise_endpoint(exercise_id: UUID, update_data: ExerciseUpdate):
-    return update_exercise(exercise_id, update_data)
+def update_exercise_endpoint(
+    exercise_id: UUID,
+    update_data: ExerciseUpdate,
+    current_user: CurrentUser,
+    session: SessionDep,
+):
+    return update_exercise(exercise_id, update_data, current_user, session)
 
 
 @router.delete(
@@ -62,5 +70,7 @@ def update_exercise_endpoint(exercise_id: UUID, update_data: ExerciseUpdate):
     summary="Delete an exercise",
     description="Delete an exercise by its unique identifier. Returns HTTP 204 No Content if deletion is successful.",
 )
-def delete_exercise_endpoint(exercise_id: UUID):
-    return delete_exercise(exercise_id)
+def delete_exercise_endpoint(
+    exercise_id: UUID, current_user: CurrentUser, session: SessionDep
+):
+    return delete_exercise(exercise_id, current_user, session)
