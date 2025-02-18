@@ -3,8 +3,11 @@ from typing import List, Optional, Union
 from uuid import UUID, uuid4
 from enum import Enum
 
-from app.schemas.fill_gap_sentence import FillGapSentence
-from app.schemas.multiple_choice_question import MultipleChoiceQuestion
+from app.schemas.fill_gap_sentence import FillGapSentence, FillGapSentenceCreate
+from app.schemas.multiple_choice_question import (
+    MultipleChoiceQuestion,
+    MultipleChoiceQuestionCreate,
+)
 
 
 class ExerciseType(str, Enum):
@@ -40,3 +43,15 @@ class Exercise(ExerciseBase):
 class ExerciseUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
+
+
+SentenceCreateUnion = Union[
+    List[FillGapSentenceCreate], List[MultipleChoiceQuestionCreate]
+]
+
+
+class SentenceCreatePayload(BaseModel):
+    sentences: SentenceCreateUnion = Field(..., min_items=1)
+
+
+SentencesUnion = Union[List[FillGapSentence], List[MultipleChoiceQuestion]]
